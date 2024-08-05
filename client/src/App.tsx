@@ -1,48 +1,116 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
+import { useEffect, useState } from "react";
+import { BackendClass } from "@genezio-sdk/genezio-project" 
 import "./App.css";
 
-export default function App() {
-  const [name, setName] = useState("");
-  const [response, setResponse] = useState("");
+type LocationApiResponse = {
+  country?: string;
+  regionName?: string;
+  city?: string;
+};
 
-  async function sayHello() {
-    setResponse("TODO: Not Implemented");
+export default function App() {
+  const [location, setLocation] = useState<LocationApiResponse>({});
+  const [catUrl, setCatUrl] = useState("");
+  const [bgColor, setBgColor] = useState("white");
+
+  const colorsArray = ["green", "blue", "pink", "yellow", "red", "orange", "purple", "brown"];
+
+  async function CallLocationApi() {
+    try {
+      const res = await BackendClass.handleCall();
+      console.log('Location API response:', res);  // Debug log
+      setLocation(res);
+    } catch (error) {
+      console.error('Error fetching location data:', error);
+    }
   }
 
-  return (
-    <>
-      <div>
-        <a href="https://genezio.com" target="_blank">
-          <img
-            src="https://raw.githubusercontent.com/Genez-io/graphics/main/svg/Logo_Genezio_White.svg"
-            className="logo genezio light"
-            alt="Genezio Logo"
-          />
-          <img
-            src="https://raw.githubusercontent.com/Genez-io/graphics/main/svg/Logo_Genezio_Black.svg"
-            className="logo genezio dark"
-            alt="Genezio Logo"
-          />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Genezio + React = ❤️</h1>
-      <div className="card">
-        <input
-          type="text"
-          className="input-box"
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Enter your name"
-        />
-        <br />
-        <br />
+  const fetchCatImage = async () => {
+    try {
+      const res = await fetch('https://api.thecatapi.com/v1/images/search?api_key=live_d7zNjuYMnUUxog47EOd1lNwM8Dpf9Z4ZU5M9RHjJs6uSwQzVy8AceZf2OZYQiKLA');
+      const data = await res.json();
+      if (data.length > 0) {
+        setCatUrl(data[0].url);
+      }
+    } catch (error) {
+      console.error('Error fetching cat image:', error);
+    }
+  };
 
-        <button onClick={() => sayHello()}>Say Hello</button>
-        <p className="read-the-docs">{response}</p>
+  useEffect(() => {
+    fetchCatImage();
+  }, []);
+
+  const changeBgColorToGreen = () => {
+    const newColor = bgColor === "green" ? "white" : "green";
+    setBgColor(newColor);
+    document.body.style.backgroundColor = newColor;
+  };
+
+  const changeBgColorFromArray = () => {
+    const randomIndex = Math.floor(Math.random() * colorsArray.length);
+    const selectedColor = colorsArray[randomIndex];
+    setBgColor(selectedColor);
+    document.body.style.backgroundColor = selectedColor;
+  };
+
+  const changeBgColorRandom = () => {
+    const currentColor = bgColor;
+    let newColor = currentColor;
+    while (newColor === currentColor) {
+      newColor = colorsArray[Math.floor(Math.random() * colorsArray.length)];
+    }
+    setBgColor(newColor);
+    document.body.style.backgroundColor = newColor;
+  };
+
+  const changeCatPhoto = () => {
+    fetchCatImage();
+  };
+
+  return (
+    <div>
+      <h1 style={{ marginBottom: "4rem" }}>Nitu Tiberiu-Florian Project</h1>
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          gap: "1rem",
+          marginBottom: "3rem",
+        }}
+      >
+        <button onClick={changeBgColorToGreen}>
+          Change background to green
+        </button>
+        <button onClick={changeBgColorFromArray}>
+          Change background from array
+        </button>
+        <button onClick={changeBgColorRandom}>
+          Change background randomly from array
+        </button>
       </div>
-    </>
+
+      {catUrl && (
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <img width={250} height={250} src={catUrl} alt="Random Cat" />
+        </div>
+      )}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginTop: "1rem",
+        }}
+      >
+        <button onClick={changeCatPhoto}>Change cat photo</button>
+      </div>
+      <div className="card">
+        <button onClick={() => CallLocationApi()}>Call location api</button>
+        <p>Country: {location.country || "no call"}</p>
+        <p>Region: {location.regionName || "no call"}</p>
+        <p>City: {location.city || "no call"}</p>
+      </div>
+    </div>
   );
 }

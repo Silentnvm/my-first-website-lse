@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@genezio-sdk/genezio-project": "^1.0.0-prod",
+    "@genezio-sdk/genezio-project3-lse": "^1.0.0-prod"
+  }
+}
